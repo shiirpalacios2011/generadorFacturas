@@ -15,6 +15,13 @@ function App() {
   const [facturaGenerada, setFacturaGenerada] = useState(null);
   const [historialFacturas, setHistorialFacturas] = useState([]);
 
+  const datosEmisor = {
+  nombre: "Facturador APP",
+  cuit: "20-12345678-9",
+  domicilio: "Argentina",
+  condicionFiscal: "Monotributista",
+};
+
   const obtenerFacturas = async () => {
     try {
       const respuesta = await fetch("http://localhost:4000/api/facturas");
@@ -87,7 +94,7 @@ function App() {
     }
   };
 
-const descargarPDF = () => {
+  const descargarPDF = () => {
   if (!facturaGenerada) {
     alert("Primero tenés que generar una factura");
     return;
@@ -95,54 +102,56 @@ const descargarPDF = () => {
 
   const pdf = new jsPDF();
 
-  // Encabezado
+  // Encabezado principal
   pdf.setFontSize(20);
-  pdf.text("Facturador APP", 20, 20);
-
-  pdf.setFontSize(12);
-  pdf.text("Factura simulada para emprendedores", 20, 28);
-
-  // Línea separadora
-  pdf.line(20, 35, 190, 35);
-
-  // Datos de la factura
-  pdf.setFontSize(14);
-  pdf.text("Datos de la factura", 20, 48);
+  pdf.text(datosEmisor.nombre, 20, 20);
 
   pdf.setFontSize(11);
-  pdf.text(`Factura N°: ${facturaGenerada.numero}`, 20, 58);
-  pdf.text(`Fecha: ${facturaGenerada.fecha}`, 20, 66);
+  pdf.text(`CUIT: ${datosEmisor.cuit}`, 20, 30);
+  pdf.text(`Domicilio: ${datosEmisor.domicilio}`, 20, 38);
+  pdf.text(`Condición fiscal: ${datosEmisor.condicionFiscal}`, 20, 46);
+
+  // Tipo de comprobante
+  pdf.setFontSize(18);
+  pdf.text("FACTURA SIMULADA", 120, 25);
+
+  pdf.setFontSize(11);
+  pdf.text(`N°: ${facturaGenerada.numero}`, 120, 35);
+  pdf.text(`Fecha: ${facturaGenerada.fecha}`, 120, 43);
+
+  // Línea separadora
+  pdf.line(20, 55, 190, 55);
 
   // Datos del cliente
   pdf.setFontSize(14);
-  pdf.text("Cliente", 20, 82);
+  pdf.text("Datos del cliente", 20, 70);
 
   pdf.setFontSize(11);
-  pdf.text(`Nombre: ${facturaGenerada.cliente}`, 20, 92);
+  pdf.text(`Cliente: ${facturaGenerada.cliente}`, 20, 82);
 
   // Detalle
   pdf.setFontSize(14);
-  pdf.text("Detalle del comprobante", 20, 110);
+  pdf.text("Detalle del comprobante", 20, 105);
 
   pdf.setFontSize(11);
-  pdf.text("Descripción", 20, 122);
-  pdf.text("Importe", 150, 122);
+  pdf.text("Descripción", 20, 118);
+  pdf.text("Importe", 155, 118);
 
-  pdf.line(20, 126, 190, 126);
+  pdf.line(20, 123, 190, 123);
 
-  pdf.text(facturaGenerada.descripcion, 20, 136);
-  pdf.text(`$${facturaGenerada.precio}`, 150, 136);
+  pdf.text(facturaGenerada.descripcion, 20, 135);
+  pdf.text(`$${facturaGenerada.precio}`, 155, 135);
 
   pdf.line(20, 145, 190, 145);
 
   // Total
-  pdf.setFontSize(14);
-  pdf.text(`TOTAL: $${facturaGenerada.precio}`, 140, 158);
+  pdf.setFontSize(16);
+  pdf.text(`TOTAL: $${facturaGenerada.precio}`, 135, 160);
 
-  // Pie
+  // Aclaración
   pdf.setFontSize(10);
-  pdf.text("Documento generado por Facturador APP", 20, 280);
-  pdf.text("Comprobante simulado sin validez fiscal", 20, 286);
+  pdf.text("Este comprobante es simulado y no tiene validez fiscal.", 20, 275);
+  pdf.text("Generado por Facturador APP.", 20, 282);
 
   pdf.save(`factura-${facturaGenerada.numero}.pdf`);
 };
