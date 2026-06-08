@@ -1,23 +1,44 @@
 .contenedor {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding: 40px 20px;
   font-family: Arial, sans-serif;
   background: #f4f6f8;
   color: #222;
+  text-align: center;
 }
 
 h1 {
   margin-bottom: 5px;
+  font-size: 42px;
 }
 
 .card {
-  margin-top: 20px;
+  max-width: 600px;
+  margin: 20px auto;
   padding: 25px;
   border-radius: 12px;
   background: white;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  text-align: center;
+}
+
+.clientes ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.clientes li {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 15px;
+  margin-top: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  text-align: left;
+  background: #fafafa;
+}
+
+.clientes strong {
+  font-size: 18px;
 }

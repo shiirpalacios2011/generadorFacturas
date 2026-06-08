@@ -20,6 +20,32 @@ app.get("/api/prueba",(req,res)=>{
 
 const PORT= process.env.PORT ||4000;
 
+app.get("/api/clientes", (req, res) => {
+  const clientes = [
+    {
+      id: 1,
+      nombre: "Cliente de prueba",
+      email: "cliente@test.com",
+      documento: "12345678",
+      telefono: "3804000000",
+    },
+    {
+      id: 2,
+      nombre: "María Gómez",
+      email: "maria@gmail.com",
+      documento: "30111222",
+      telefono: "3804555555",
+    },
+  ];
+
+  res.json(clientes);
+});
+
+
+
+
+
+
 app.listen(PORT,()=>{
     console.log("Servidor corriendo en el puerto",PORT);
 })
