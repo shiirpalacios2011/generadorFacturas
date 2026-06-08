@@ -1,68 +1,146 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #fff1f7;
+}
+
 .contenedor {
   min-height: 100vh;
-  padding: 40px 20px;
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  color: #222;
+  padding: 50px 20px;
+  color: #3b0a24;
   text-align: center;
+  background:
+    radial-gradient(circle at top left, rgba(244, 114, 182, 0.35), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(190, 24, 93, 0.18), transparent 35%),
+    linear-gradient(135deg, #fff7fb, #fce7f3);
 }
 
 h1 {
-  margin-bottom: 5px;
-  font-size: 42px;
+  margin: 0;
+  font-size: 46px;
+  color: #9d174d;
+  letter-spacing: -1px;
+}
+
+.contenedor > p {
+  margin-top: 6px;
+  margin-bottom: 28px;
+  font-size: 18px;
+  color: #6b1238;
+}
+
+h2 {
+  margin-top: 0;
+  color: #9d174d;
+  font-size: 25px;
 }
 
 .card {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 25px;
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 650px;
+  margin: 24px auto;
+  padding: 28px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 45px rgba(157, 23, 77, 0.15);
+  border: 1px solid rgba(249, 168, 212, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  transition: 0.2s ease;
+}
+
+.card:first-of-type {
+  max-width: 560px;
+  padding: 22px;
+  background: #ffffff;
+}
+
+.card:first-of-type p {
+  margin-bottom: 0;
+  color: #831843;
+  font-weight: 500;
 }
 
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   text-align: left;
 }
 
 .formulario label {
-  font-weight: bold;
+  font-weight: 700;
+  color: #831843;
+  font-size: 15px;
+  margin-top: 4px;
 }
 
 .formulario input,
 .formulario select {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  width: 100%;
+  padding: 14px 15px;
+  border: 1px solid #f9a8d4;
+  border-radius: 14px;
   font-size: 15px;
+  outline: none;
+  background: #fff7fb;
+  color: #3b0a24;
+  transition: 0.2s ease;
+}
+
+.formulario input::placeholder {
+  color: #9f6b83;
+}
+
+.formulario input:focus,
+.formulario select:focus {
+  border-color: #db2777;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.13);
 }
 
 .formulario button {
-  margin-top: 10px;
-  padding: 12px;
+  margin-top: 12px;
+  padding: 15px;
   border: none;
-  border-radius: 8px;
-  background: #222;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #db2777, #be185d);
   color: white;
   font-size: 16px;
   cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(219, 39, 119, 0.28);
+  transition: 0.2s ease;
 }
 
 .formulario button:hover {
-  background: #444;
+  background: linear-gradient(135deg, #be185d, #9d174d);
+  transform: translateY(-1px);
 }
 
 .factura {
   text-align: left;
+  border-left: 6px solid #db2777;
 }
 
 .factura h2 {
   text-align: center;
 }
 
+.factura p {
+  font-size: 17px;
+  margin: 9px 0;
+}
+
+.factura strong {
+  color: #831843;
+}
 
 .historial ul {
   list-style: none;
@@ -73,57 +151,87 @@ h1 {
 .historial li {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 15px;
-  margin-top: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  gap: 7px;
+  padding: 18px;
+  margin-top: 14px;
+  border: 1px solid #f9a8d4;
+  border-left: 6px solid #db2777;
+  border-radius: 16px;
   text-align: left;
-  background: #fafafa;
+  background: linear-gradient(135deg, #fff7fb, #ffffff);
+  box-shadow: 0 8px 20px rgba(157, 23, 77, 0.08);
 }
 
 .historial strong {
   font-size: 18px;
+  color: #9d174d;
+}
+
+.historial span {
+  color: #4a1230;
+  font-size: 15px;
 }
 
 .boton-pdf {
-  margin-top: 15px;
-  padding: 12px;
+  margin-top: 18px;
+  padding: 14px;
   width: 100%;
   border: none;
-  border-radius: 8px;
-  background: #0f172a;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #831843, #be185d);
   color: white;
   font-size: 16px;
   cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(131, 24, 67, 0.22);
+  transition: 0.2s ease;
 }
 
 .boton-pdf:hover {
-  background: #1e293b;
+  background: linear-gradient(135deg, #701a3c, #9d174d);
+  transform: translateY(-1px);
 }
 
 .boton-pdf-historial {
   margin-top: 10px;
   width: auto;
   align-self: flex-start;
-  padding: 8px 12px;
+  padding: 9px 14px;
   font-size: 14px;
 }
 
-
 .boton-eliminar {
-  margin-top: 8px;
+  margin-top: 4px;
   width: auto;
   align-self: flex-start;
-  padding: 8px 12px;
+  padding: 9px 14px;
   border: none;
-  border-radius: 8px;
-  background: #b91c1c;
-  color: white;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
   font-size: 14px;
   cursor: pointer;
+  font-weight: 700;
+  transition: 0.2s ease;
 }
 
 .boton-eliminar:hover {
-  background: #991b1b;
+  background: #e11d48;
+  color: white;
+}
+
+@media (max-width: 700px) {
+  .contenedor {
+    padding: 30px 14px;
+  }
+
+  h1 {
+    font-size: 36px;
+  }
+
+  .card {
+    padding: 22px;
+    border-radius: 20px;
+  }
 }
