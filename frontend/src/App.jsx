@@ -87,28 +87,65 @@ function App() {
     }
   };
 
-  const descargarPDF = () => {
-    if (!facturaGenerada) {
-      alert("Primero tenés que generar una factura");
-      return;
-    }
+const descargarPDF = () => {
+  if (!facturaGenerada) {
+    alert("Primero tenés que generar una factura");
+    return;
+  }
 
-    const pdf = new jsPDF();
+  const pdf = new jsPDF();
 
-    pdf.setFontSize(18);
-    pdf.text("Factura simulada", 20, 20);
+  // Encabezado
+  pdf.setFontSize(20);
+  pdf.text("Facturador APP", 20, 20);
 
-    pdf.setFontSize(12);
-    pdf.text(`Factura N°: ${facturaGenerada.numero}`, 20, 40);
-    pdf.text(`Fecha: ${facturaGenerada.fecha}`, 20, 50);
-    pdf.text(`Cliente: ${facturaGenerada.cliente}`, 20, 60);
-    pdf.text(`Detalle: ${facturaGenerada.descripcion}`, 20, 70);
-    pdf.text(`Total: $${facturaGenerada.precio}`, 20, 80);
+  pdf.setFontSize(12);
+  pdf.text("Factura simulada para emprendedores", 20, 28);
 
-    pdf.text("Documento generado por Facturador APP", 20, 110);
+  // Línea separadora
+  pdf.line(20, 35, 190, 35);
 
-    pdf.save(`factura-${facturaGenerada.numero}.pdf`);
-  };
+  // Datos de la factura
+  pdf.setFontSize(14);
+  pdf.text("Datos de la factura", 20, 48);
+
+  pdf.setFontSize(11);
+  pdf.text(`Factura N°: ${facturaGenerada.numero}`, 20, 58);
+  pdf.text(`Fecha: ${facturaGenerada.fecha}`, 20, 66);
+
+  // Datos del cliente
+  pdf.setFontSize(14);
+  pdf.text("Cliente", 20, 82);
+
+  pdf.setFontSize(11);
+  pdf.text(`Nombre: ${facturaGenerada.cliente}`, 20, 92);
+
+  // Detalle
+  pdf.setFontSize(14);
+  pdf.text("Detalle del comprobante", 20, 110);
+
+  pdf.setFontSize(11);
+  pdf.text("Descripción", 20, 122);
+  pdf.text("Importe", 150, 122);
+
+  pdf.line(20, 126, 190, 126);
+
+  pdf.text(facturaGenerada.descripcion, 20, 136);
+  pdf.text(`$${facturaGenerada.precio}`, 150, 136);
+
+  pdf.line(20, 145, 190, 145);
+
+  // Total
+  pdf.setFontSize(14);
+  pdf.text(`TOTAL: $${facturaGenerada.precio}`, 140, 158);
+
+  // Pie
+  pdf.setFontSize(10);
+  pdf.text("Documento generado por Facturador APP", 20, 280);
+  pdf.text("Comprobante simulado sin validez fiscal", 20, 286);
+
+  pdf.save(`factura-${facturaGenerada.numero}.pdf`);
+};
 
   return (
     <main className="contenedor">
