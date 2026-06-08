@@ -94,9 +94,9 @@ function App() {
     }
   };
 
-  const descargarPDF = () => {
-  if (!facturaGenerada) {
-    alert("Primero tenés que generar una factura");
+   const descargarPDF = (facturaParaDescargar) => {
+  if (!facturaParaDescargar) {
+    alert("No hay factura para descargar");
     return;
   }
 
@@ -116,8 +116,8 @@ function App() {
   pdf.text("FACTURA SIMULADA", 120, 25);
 
   pdf.setFontSize(11);
-  pdf.text(`N°: ${facturaGenerada.numero}`, 120, 35);
-  pdf.text(`Fecha: ${facturaGenerada.fecha}`, 120, 43);
+  pdf.text(`N°: ${facturaParaDescargar.numero}`, 120, 35);
+  pdf.text(`Fecha: ${facturaParaDescargar.fecha}`, 120, 43);
 
   // Línea separadora
   pdf.line(20, 55, 190, 55);
@@ -127,7 +127,7 @@ function App() {
   pdf.text("Datos del cliente", 20, 70);
 
   pdf.setFontSize(11);
-  pdf.text(`Cliente: ${facturaGenerada.cliente}`, 20, 82);
+  pdf.text(`Cliente: ${facturaParaDescargar.cliente}`, 20, 82);
 
   // Detalle
   pdf.setFontSize(14);
@@ -139,21 +139,21 @@ function App() {
 
   pdf.line(20, 123, 190, 123);
 
-  pdf.text(facturaGenerada.descripcion, 20, 135);
-  pdf.text(`$${facturaGenerada.precio}`, 155, 135);
+  pdf.text(facturaParaDescargar.descripcion, 20, 135);
+  pdf.text(`$${facturaParaDescargar.precio}`, 155, 135);
 
   pdf.line(20, 145, 190, 145);
 
   // Total
   pdf.setFontSize(16);
-  pdf.text(`TOTAL: $${facturaGenerada.precio}`, 135, 160);
+  pdf.text(`TOTAL: $${facturaParaDescargar.precio}`, 135, 160);
 
   // Aclaración
   pdf.setFontSize(10);
   pdf.text("Este comprobante es simulado y no tiene validez fiscal.", 20, 275);
   pdf.text("Generado por Facturador APP.", 20, 282);
 
-  pdf.save(`factura-${facturaGenerada.numero}.pdf`);
+  pdf.save(`factura-${facturaParaDescargar.numero}.pdf`);
 };
 
   return (
@@ -233,9 +233,12 @@ function App() {
             <strong>Total:</strong> ${facturaGenerada.precio}
           </p>
 
-          <button className="boton-pdf" onClick={descargarPDF}>
-            Descargar PDF
-          </button>
+          <button
+           className="boton-pdf"
+           onClick={() => descargarPDF(facturaGenerada)}
+          >
+          Descargar PDF
+         </button>
         </section>
       )}
 
@@ -246,15 +249,22 @@ function App() {
           <p>No hay facturas generadas todavía</p>
         ) : (
           <ul>
-            {historialFacturas.map((factura) => (
-              <li key={factura.id}>
-                <strong>Factura N° {factura.numero}</strong>
-                <span>Fecha: {factura.fecha}</span>
-                <span>Cliente: {factura.cliente}</span>
-                <span>Detalle: {factura.descripcion}</span>
-                <span>Total: ${factura.precio}</span>
-              </li>
-            ))}
+           {historialFacturas.map((factura) => (
+  <li key={factura.id}>
+    <strong>Factura N° {factura.numero}</strong>
+    <span>Fecha: {factura.fecha}</span>
+    <span>Cliente: {factura.cliente}</span>
+    <span>Detalle: {factura.descripcion}</span>
+    <span>Total: ${factura.precio}</span>
+
+    <button
+      className="boton-pdf boton-pdf-historial"
+      onClick={() => descargarPDF(factura)}
+    >
+      Descargar PDF
+    </button>
+  </li>
+))}
           </ul>
         )}
       </section>
