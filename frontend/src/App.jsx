@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { jsPDF } from "jspdf";
 import "./App.css";
 
 function App() {
@@ -14,6 +15,15 @@ function App() {
   const [facturaGenerada, setFacturaGenerada] = useState(null);
   const [historialFacturas, setHistorialFacturas] = useState([]);
 
+  const obtenerFacturas = async () => {
+    try {
+      const respuesta = await fetch("http://localhost:4000/api/facturas");
+      const datos = await respuesta.json();
+      setHistorialFacturas(datos);
+    } catch (error) {
+      console.error("Error al obtener facturas:", error);
+    }
+  };
 
   useEffect(() => {
     fetch("http://localhost:4000/api/prueba")
@@ -33,8 +43,8 @@ function App() {
       .catch((error) => {
         console.error("Error al obtener clientes:", error);
       });
-       obtenerFacturas();
 
+    obtenerFacturas();
   }, []);
 
   const manejarCambio = (e) => {
@@ -43,19 +53,6 @@ function App() {
       [e.target.name]: e.target.value,
     });
   };
-
-const obtenerFacturas = async () => {
-  try {
-    const respuesta = await fetch("http://localhost:4000/api/facturas");
-    const datos = await respuesta.json();
-    setHistorialFacturas(datos);
-  } catch (error) {
-    console.error("Error al obtener facturas:", error);
-  }
-};
-
-
-
 
   const generarFactura = async (e) => {
     e.preventDefault();
@@ -78,6 +75,7 @@ const obtenerFacturas = async () => {
 
       setFacturaGenerada(datos.factura);
       obtenerFacturas();
+
       setFactura({
         cliente: "",
         descripcion: "",
@@ -87,6 +85,29 @@ const obtenerFacturas = async () => {
       console.error("Error al enviar factura:", error);
       alert("No se pudo conectar con el backend");
     }
+  };
+
+  const descargarPDF = () => {
+    if (!facturaGenerada) {
+      alert("Primero tenés que generar una factura");
+      return;
+    }
+
+    const pdf = new jsPDF();
+
+    pdf.setFontSize(18);
+    pdf.text("Factura simulada", 20, 20);
+
+    pdf.setFontSize(12);
+    pdf.text(`Factura N°: ${facturaGenerada.numero}`, 20, 40);
+    pdf.text(`Fecha: ${facturaGenerada.fecha}`, 20, 50);
+    pdf.text(`Cliente: ${facturaGenerada.cliente}`, 20, 60);
+    pdf.text(`Detalle: ${facturaGenerada.descripcion}`, 20, 70);
+    pdf.text(`Total: $${facturaGenerada.precio}`, 20, 80);
+
+    pdf.text("Documento generado por Facturador APP", 20, 110);
+
+    pdf.save(`factura-${facturaGenerada.numero}.pdf`);
   };
 
   return (
@@ -142,7 +163,7 @@ const obtenerFacturas = async () => {
         </form>
       </section>
 
-           {facturaGenerada && (
+      {facturaGenerada && (
         <section className="card factura">
           <h2>Última factura generada</h2>
 
@@ -165,6 +186,10 @@ const obtenerFacturas = async () => {
           <p>
             <strong>Total:</strong> ${facturaGenerada.precio}
           </p>
+
+          <button className="boton-pdf" onClick={descargarPDF}>
+            Descargar PDF
+          </button>
         </section>
       )}
 

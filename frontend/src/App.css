@@ -85,3 +85,19 @@ h1 {
 .historial strong {
   font-size: 18px;
 }
+
+.boton-pdf {
+  margin-top: 15px;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: #0f172a;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.boton-pdf:hover {
+  background: #1e293b;
+}
