@@ -44,11 +44,11 @@ function App() {
     e.preventDefault();
 
     const nuevaFactura = {
+      numero: Math.floor(Math.random() * 100000),
+      fecha: new Date().toLocaleDateString(),
       cliente: factura.cliente,
       descripcion: factura.descripcion,
       precio: Number(factura.precio),
-      fecha: new Date().toLocaleDateString(),
-      numero: Math.floor(Math.random() * 100000),
     };
 
     setFacturaGenerada(nuevaFactura);
@@ -110,18 +110,23 @@ function App() {
       {facturaGenerada && (
         <section className="card factura">
           <h2>Factura simulada</h2>
+
           <p>
             <strong>N°:</strong> {facturaGenerada.numero}
           </p>
+
           <p>
             <strong>Fecha:</strong> {facturaGenerada.fecha}
           </p>
+
           <p>
             <strong>Cliente:</strong> {facturaGenerada.cliente}
           </p>
+
           <p>
             <strong>Detalle:</strong> {facturaGenerada.descripcion}
           </p>
+
           <p>
             <strong>Total:</strong> ${facturaGenerada.precio}
           </p>
