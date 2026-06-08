@@ -109,3 +109,21 @@ h1 {
   padding: 8px 12px;
   font-size: 14px;
 }
+
+
+.boton-eliminar {
+  margin-top: 8px;
+  width: auto;
+  align-self: flex-start;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #b91c1c;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.boton-eliminar:hover {
+  background: #991b1b;
+}

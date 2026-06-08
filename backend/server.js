@@ -73,7 +73,23 @@ app.get("/api/facturas", (req, res) => {
   res.json(facturas);
 });
 
+app.delete("/api/facturas/:id", (req, res) => {
+  const id = Number(req.params.id);
 
+  const facturaExiste = facturas.find((factura) => factura.id === id);
+
+  if (!facturaExiste) {
+    return res.status(404).json({
+      mensaje: "Factura no encontrada",
+    });
+  }
+
+  facturas = facturas.filter((factura) => factura.id !== id);
+
+  res.json({
+    mensaje: "Factura eliminada correctamente",
+  });
+});
 
 
 app.listen(PORT,()=>{

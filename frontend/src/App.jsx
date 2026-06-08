@@ -156,6 +156,38 @@ function App() {
   pdf.save(`factura-${facturaParaDescargar.numero}.pdf`);
 };
 
+const eliminarFactura = async (id) => {
+  const confirmar = confirm("¿Seguro querés eliminar esta factura?");
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`http://localhost:4000/api/facturas/${id}`, {
+      method: "DELETE",
+    });
+
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(datos.mensaje || "Error al eliminar la factura");
+      return;
+    }
+
+    obtenerFacturas();
+
+    if (facturaGenerada && facturaGenerada.id === id) {
+      setFacturaGenerada(null);
+    }
+  } catch (error) {
+    console.error("Error al eliminar factura:", error);
+    alert("No se pudo conectar con el backend");
+  }
+};
+
+
+
   return (
     <main className="contenedor">
       <h1>Facturador APP</h1>
@@ -263,6 +295,13 @@ function App() {
     >
       Descargar PDF
     </button>
+      <button
+  className="boton-eliminar"
+  onClick={() => eliminarFactura(factura.id)}
+>
+  Eliminar
+</button>
+
   </li>
 ))}
           </ul>
