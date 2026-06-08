@@ -62,3 +62,26 @@ h1 {
 .factura h2 {
   text-align: center;
 }
+
+
+.historial ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.historial li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 15px;
+  margin-top: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  text-align: left;
+  background: #fafafa;
+}
+
+.historial strong {
+  font-size: 18px;
+}

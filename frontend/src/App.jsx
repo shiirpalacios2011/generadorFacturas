@@ -12,6 +12,8 @@ function App() {
   });
 
   const [facturaGenerada, setFacturaGenerada] = useState(null);
+  const [historialFacturas, setHistorialFacturas] = useState([]);
+
 
   useEffect(() => {
     fetch("http://localhost:4000/api/prueba")
@@ -31,6 +33,8 @@ function App() {
       .catch((error) => {
         console.error("Error al obtener clientes:", error);
       });
+       obtenerFacturas();
+
   }, []);
 
   const manejarCambio = (e) => {
@@ -39,6 +43,19 @@ function App() {
       [e.target.name]: e.target.value,
     });
   };
+
+const obtenerFacturas = async () => {
+  try {
+    const respuesta = await fetch("http://localhost:4000/api/facturas");
+    const datos = await respuesta.json();
+    setHistorialFacturas(datos);
+  } catch (error) {
+    console.error("Error al obtener facturas:", error);
+  }
+};
+
+
+
 
   const generarFactura = async (e) => {
     e.preventDefault();
@@ -60,7 +77,7 @@ function App() {
       }
 
       setFacturaGenerada(datos.factura);
-
+      obtenerFacturas();
       setFactura({
         cliente: "",
         descripcion: "",
@@ -125,9 +142,9 @@ function App() {
         </form>
       </section>
 
-      {facturaGenerada && (
+           {facturaGenerada && (
         <section className="card factura">
-          <h2>Factura simulada</h2>
+          <h2>Última factura generada</h2>
 
           <p>
             <strong>N°:</strong> {facturaGenerada.numero}
@@ -150,6 +167,26 @@ function App() {
           </p>
         </section>
       )}
+
+      <section className="card historial">
+        <h2>Historial de facturas</h2>
+
+        {historialFacturas.length === 0 ? (
+          <p>No hay facturas generadas todavía</p>
+        ) : (
+          <ul>
+            {historialFacturas.map((factura) => (
+              <li key={factura.id}>
+                <strong>Factura N° {factura.numero}</strong>
+                <span>Fecha: {factura.fecha}</span>
+                <span>Cliente: {factura.cliente}</span>
+                <span>Detalle: {factura.descripcion}</span>
+                <span>Total: ${factura.precio}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }
