@@ -41,7 +41,37 @@ app.get("/api/clientes", (req, res) => {
   res.json(clientes);
 });
 
+let facturas = [];
 
+app.post("/api/facturas", (req, res) => {
+  const { cliente, descripcion, precio } = req.body;
+
+  if (!cliente || !descripcion || !precio) {
+    return res.status(400).json({
+      mensaje: "Faltan datos para generar la factura",
+    });
+  }
+
+  const nuevaFactura = {
+    id: facturas.length + 1,
+    numero: Math.floor(Math.random() * 100000),
+    fecha: new Date().toLocaleDateString(),
+    cliente,
+    descripcion,
+    precio: Number(precio),
+  };
+
+  facturas.push(nuevaFactura);
+
+  res.status(201).json({
+    mensaje: "Factura generada correctamente",
+    factura: nuevaFactura,
+  });
+});
+
+app.get("/api/facturas", (req, res) => {
+  res.json(facturas);
+});
 
 
 

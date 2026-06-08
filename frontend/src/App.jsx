@@ -40,18 +40,36 @@ function App() {
     });
   };
 
-  const generarFactura = (e) => {
+  const generarFactura = async (e) => {
     e.preventDefault();
 
-    const nuevaFactura = {
-      numero: Math.floor(Math.random() * 100000),
-      fecha: new Date().toLocaleDateString(),
-      cliente: factura.cliente,
-      descripcion: factura.descripcion,
-      precio: Number(factura.precio),
-    };
+    try {
+      const respuesta = await fetch("http://localhost:4000/api/facturas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(factura),
+      });
 
-    setFacturaGenerada(nuevaFactura);
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        alert(datos.mensaje || "Error al generar la factura");
+        return;
+      }
+
+      setFacturaGenerada(datos.factura);
+
+      setFactura({
+        cliente: "",
+        descripcion: "",
+        precio: "",
+      });
+    } catch (error) {
+      console.error("Error al enviar factura:", error);
+      alert("No se pudo conectar con el backend");
+    }
   };
 
   return (
