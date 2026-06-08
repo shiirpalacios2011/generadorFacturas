@@ -21,24 +21,44 @@ h1 {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.clientes ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.clientes li {
+.formulario {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 15px;
-  margin-top: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  gap: 12px;
   text-align: left;
-  background: #fafafa;
 }
 
-.clientes strong {
-  font-size: 18px;
+.formulario label {
+  font-weight: bold;
+}
+
+.formulario input,
+.formulario select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.formulario button {
+  margin-top: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #222;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.formulario button:hover {
+  background: #444;
+}
+
+.factura {
+  text-align: left;
+}
+
+.factura h2 {
+  text-align: center;
 }

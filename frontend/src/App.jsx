@@ -5,6 +5,14 @@ function App() {
   const [mensaje, setMensaje] = useState("Cargando conexión...");
   const [clientes, setClientes] = useState([]);
 
+  const [factura, setFactura] = useState({
+    cliente: "",
+    descripcion: "",
+    precio: "",
+  });
+
+  const [facturaGenerada, setFacturaGenerada] = useState(null);
+
   useEffect(() => {
     fetch("http://localhost:4000/api/prueba")
       .then((respuesta) => respuesta.json())
@@ -25,6 +33,27 @@ function App() {
       });
   }, []);
 
+  const manejarCambio = (e) => {
+    setFactura({
+      ...factura,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const generarFactura = (e) => {
+    e.preventDefault();
+
+    const nuevaFactura = {
+      cliente: factura.cliente,
+      descripcion: factura.descripcion,
+      precio: Number(factura.precio),
+      fecha: new Date().toLocaleDateString(),
+      numero: Math.floor(Math.random() * 100000),
+    };
+
+    setFacturaGenerada(nuevaFactura);
+  };
+
   return (
     <main className="contenedor">
       <h1>Facturador APP</h1>
@@ -35,24 +64,69 @@ function App() {
         <p>{mensaje}</p>
       </div>
 
-      <section className="card clientes">
-        <h2>Clientes</h2>
+      <section className="card">
+        <h2>Crear factura simulada</h2>
 
-        {clientes.length === 0 ? (
-          <p>No hay clientes cargados</p>
-        ) : (
-          <ul>
+        <form onSubmit={generarFactura} className="formulario">
+          <label>Cliente</label>
+          <select
+            name="cliente"
+            value={factura.cliente}
+            onChange={manejarCambio}
+            required
+          >
+            <option value="">Seleccionar cliente</option>
             {clientes.map((cliente) => (
-              <li key={cliente.id}>
-                <strong>{cliente.nombre}</strong>
-                <span>{cliente.email}</span>
-                <span>DNI/CUIT: {cliente.documento}</span>
-                <span>Tel: {cliente.telefono}</span>
-              </li>
+              <option key={cliente.id} value={cliente.nombre}>
+                {cliente.nombre}
+              </option>
             ))}
-          </ul>
-        )}
+          </select>
+
+          <label>Producto o servicio</label>
+          <input
+            type="text"
+            name="descripcion"
+            value={factura.descripcion}
+            onChange={manejarCambio}
+            placeholder="Ej: Servicio de diseño"
+            required
+          />
+
+          <label>Precio</label>
+          <input
+            type="number"
+            name="precio"
+            value={factura.precio}
+            onChange={manejarCambio}
+            placeholder="Ej: 15000"
+            required
+          />
+
+          <button type="submit">Generar factura</button>
+        </form>
       </section>
+
+      {facturaGenerada && (
+        <section className="card factura">
+          <h2>Factura simulada</h2>
+          <p>
+            <strong>N°:</strong> {facturaGenerada.numero}
+          </p>
+          <p>
+            <strong>Fecha:</strong> {facturaGenerada.fecha}
+          </p>
+          <p>
+            <strong>Cliente:</strong> {facturaGenerada.cliente}
+          </p>
+          <p>
+            <strong>Detalle:</strong> {facturaGenerada.descripcion}
+          </p>
+          <p>
+            <strong>Total:</strong> ${facturaGenerada.precio}
+          </p>
+        </section>
+      )}
     </main>
   );
 }
