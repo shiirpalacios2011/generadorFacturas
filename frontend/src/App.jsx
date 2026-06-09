@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 import "./App.css";
 
+const API_URL = "http://localhost:4000";
+
 function App() {
   const [mensaje, setMensaje] = useState("Cargando conexión...");
   const [clientes, setClientes] = useState([]);
@@ -16,15 +18,15 @@ function App() {
   const [historialFacturas, setHistorialFacturas] = useState([]);
 
   const datosEmisor = {
-  nombre: "Facturador APP",
-  cuit: "20-12345678-9",
-  domicilio: "Argentina",
-  condicionFiscal: "Monotributista",
-};
+    nombre: "Facturador APP",
+    cuit: "20-12345678-9",
+    domicilio: "Argentina",
+    condicionFiscal: "Monotributista",
+  };
 
   const obtenerFacturas = async () => {
     try {
-      const respuesta = await fetch("http://localhost:4000/api/facturas");
+      const respuesta = await fetch(`${API_URL}/api/facturas`);
       const datos = await respuesta.json();
       setHistorialFacturas(datos);
     } catch (error) {
@@ -33,7 +35,7 @@ function App() {
   };
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/prueba")
+    fetch(`${API_URL}/api/prueba`)
       .then((respuesta) => respuesta.json())
       .then((datos) => {
         setMensaje(datos.mensaje);
@@ -42,7 +44,7 @@ function App() {
         setMensaje("No se pudo conectar con el backend");
       });
 
-    fetch("http://localhost:4000/api/clientes")
+    fetch(`${API_URL}/api/clientes`)
       .then((respuesta) => respuesta.json())
       .then((datos) => {
         setClientes(datos);
@@ -65,7 +67,7 @@ function App() {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch("http://localhost:4000/api/facturas", {
+      const respuesta = await fetch(`${API_URL}/api/facturas`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,99 +96,90 @@ function App() {
     }
   };
 
-   const descargarPDF = (facturaParaDescargar) => {
-  if (!facturaParaDescargar) {
-    alert("No hay factura para descargar");
-    return;
-  }
-
-  const pdf = new jsPDF();
-
-  // Encabezado principal
-  pdf.setFontSize(20);
-  pdf.text(datosEmisor.nombre, 20, 20);
-
-  pdf.setFontSize(11);
-  pdf.text(`CUIT: ${datosEmisor.cuit}`, 20, 30);
-  pdf.text(`Domicilio: ${datosEmisor.domicilio}`, 20, 38);
-  pdf.text(`Condición fiscal: ${datosEmisor.condicionFiscal}`, 20, 46);
-
-  // Tipo de comprobante
-  pdf.setFontSize(18);
-  pdf.text("FACTURA SIMULADA", 120, 25);
-
-  pdf.setFontSize(11);
-  pdf.text(`N°: ${facturaParaDescargar.numero}`, 120, 35);
-  pdf.text(`Fecha: ${facturaParaDescargar.fecha}`, 120, 43);
-
-  // Línea separadora
-  pdf.line(20, 55, 190, 55);
-
-  // Datos del cliente
-  pdf.setFontSize(14);
-  pdf.text("Datos del cliente", 20, 70);
-
-  pdf.setFontSize(11);
-  pdf.text(`Cliente: ${facturaParaDescargar.cliente}`, 20, 82);
-
-  // Detalle
-  pdf.setFontSize(14);
-  pdf.text("Detalle del comprobante", 20, 105);
-
-  pdf.setFontSize(11);
-  pdf.text("Descripción", 20, 118);
-  pdf.text("Importe", 155, 118);
-
-  pdf.line(20, 123, 190, 123);
-
-  pdf.text(facturaParaDescargar.descripcion, 20, 135);
-  pdf.text(`$${facturaParaDescargar.precio}`, 155, 135);
-
-  pdf.line(20, 145, 190, 145);
-
-  // Total
-  pdf.setFontSize(16);
-  pdf.text(`TOTAL: $${facturaParaDescargar.precio}`, 135, 160);
-
-  // Aclaración
-  pdf.setFontSize(10);
-  pdf.text("Este comprobante es simulado y no tiene validez fiscal.", 20, 275);
-  pdf.text("Generado por Facturador APP.", 20, 282);
-
-  pdf.save(`factura-${facturaParaDescargar.numero}.pdf`);
-};
-
-const eliminarFactura = async (id) => {
-  const confirmar = confirm("¿Seguro querés eliminar esta factura?");
-
-  if (!confirmar) {
-    return;
-  }
-
-  try {
-    const respuesta = await fetch(`http://localhost:4000/api/facturas/${id}`, {
-      method: "DELETE",
-    });
-
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-      alert(datos.mensaje || "Error al eliminar la factura");
+  const descargarPDF = (facturaParaDescargar) => {
+    if (!facturaParaDescargar) {
+      alert("No hay factura para descargar");
       return;
     }
 
-    obtenerFacturas();
+    const pdf = new jsPDF();
 
-    if (facturaGenerada && facturaGenerada.id === id) {
-      setFacturaGenerada(null);
+    pdf.setFontSize(20);
+    pdf.text(datosEmisor.nombre, 20, 20);
+
+    pdf.setFontSize(11);
+    pdf.text(`CUIT: ${datosEmisor.cuit}`, 20, 30);
+    pdf.text(`Domicilio: ${datosEmisor.domicilio}`, 20, 38);
+    pdf.text(`Condición fiscal: ${datosEmisor.condicionFiscal}`, 20, 46);
+
+    pdf.setFontSize(18);
+    pdf.text("FACTURA SIMULADA", 120, 25);
+
+    pdf.setFontSize(11);
+    pdf.text(`N°: ${facturaParaDescargar.numero}`, 120, 35);
+    pdf.text(`Fecha: ${facturaParaDescargar.fecha}`, 120, 43);
+
+    pdf.line(20, 55, 190, 55);
+
+    pdf.setFontSize(14);
+    pdf.text("Datos del cliente", 20, 70);
+
+    pdf.setFontSize(11);
+    pdf.text(`Cliente: ${facturaParaDescargar.cliente}`, 20, 82);
+
+    pdf.setFontSize(14);
+    pdf.text("Detalle del comprobante", 20, 105);
+
+    pdf.setFontSize(11);
+    pdf.text("Descripción", 20, 118);
+    pdf.text("Importe", 155, 118);
+
+    pdf.line(20, 123, 190, 123);
+
+    pdf.text(facturaParaDescargar.descripcion, 20, 135);
+    pdf.text(`$${facturaParaDescargar.precio}`, 155, 135);
+
+    pdf.line(20, 145, 190, 145);
+
+    pdf.setFontSize(16);
+    pdf.text(`TOTAL: $${facturaParaDescargar.precio}`, 135, 160);
+
+    pdf.setFontSize(10);
+    pdf.text("Este comprobante es simulado y no tiene validez fiscal.", 20, 275);
+    pdf.text("Generado por Facturador APP.", 20, 282);
+
+    pdf.save(`factura-${facturaParaDescargar.numero}.pdf`);
+  };
+
+  const eliminarFactura = async (id) => {
+    const confirmar = confirm("¿Seguro querés eliminar esta factura?");
+
+    if (!confirmar) {
+      return;
     }
-  } catch (error) {
-    console.error("Error al eliminar factura:", error);
-    alert("No se pudo conectar con el backend");
-  }
-};
 
+    try {
+      const respuesta = await fetch(`${API_URL}/api/facturas/${id}`, {
+        method: "DELETE",
+      });
 
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        alert(datos.mensaje || "Error al eliminar la factura");
+        return;
+      }
+
+      obtenerFacturas();
+
+      if (facturaGenerada && facturaGenerada.id === id) {
+        setFacturaGenerada(null);
+      }
+    } catch (error) {
+      console.error("Error al eliminar factura:", error);
+      alert("No se pudo conectar con el backend");
+    }
+  };
 
   return (
     <main className="contenedor">
@@ -203,19 +196,22 @@ const eliminarFactura = async (id) => {
 
         <form onSubmit={generarFactura} className="formulario">
           <label>Cliente</label>
-          <select
+
+          <input
+            type="text"
             name="cliente"
+            list="lista-clientes"
             value={factura.cliente}
             onChange={manejarCambio}
+            placeholder="Seleccionar o escribir cliente"
             required
-          >
-            <option value="">Seleccionar cliente</option>
+          />
+
+          <datalist id="lista-clientes">
             {clientes.map((cliente) => (
-              <option key={cliente.id} value={cliente.nombre}>
-                {cliente.nombre}
-              </option>
+              <option key={cliente.id} value={cliente.nombre} />
             ))}
-          </select>
+          </datalist>
 
           <label>Producto o servicio</label>
           <input
@@ -266,11 +262,11 @@ const eliminarFactura = async (id) => {
           </p>
 
           <button
-           className="boton-pdf"
-           onClick={() => descargarPDF(facturaGenerada)}
+            className="boton-pdf"
+            onClick={() => descargarPDF(facturaGenerada)}
           >
-          Descargar PDF
-         </button>
+            Descargar PDF
+          </button>
         </section>
       )}
 
@@ -281,29 +277,29 @@ const eliminarFactura = async (id) => {
           <p>No hay facturas generadas todavía</p>
         ) : (
           <ul>
-           {historialFacturas.map((factura) => (
-  <li key={factura.id}>
-    <strong>Factura N° {factura.numero}</strong>
-    <span>Fecha: {factura.fecha}</span>
-    <span>Cliente: {factura.cliente}</span>
-    <span>Detalle: {factura.descripcion}</span>
-    <span>Total: ${factura.precio}</span>
+            {historialFacturas.map((factura) => (
+              <li key={factura.id}>
+                <strong>Factura N° {factura.numero}</strong>
+                <span>Fecha: {factura.fecha}</span>
+                <span>Cliente: {factura.cliente}</span>
+                <span>Detalle: {factura.descripcion}</span>
+                <span>Total: ${factura.precio}</span>
 
-    <button
-      className="boton-pdf boton-pdf-historial"
-      onClick={() => descargarPDF(factura)}
-    >
-      Descargar PDF
-    </button>
-      <button
-  className="boton-eliminar"
-  onClick={() => eliminarFactura(factura.id)}
->
-  Eliminar
-</button>
+                <button
+                  className="boton-pdf boton-pdf-historial"
+                  onClick={() => descargarPDF(factura)}
+                >
+                  Descargar PDF
+                </button>
 
-  </li>
-))}
+                <button
+                  className="boton-eliminar"
+                  onClick={() => eliminarFactura(factura.id)}
+                >
+                  Eliminar
+                </button>
+              </li>
+            ))}
           </ul>
         )}
       </section>
