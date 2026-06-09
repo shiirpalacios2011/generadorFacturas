@@ -7,6 +7,12 @@ const API_URL = "http://localhost:4000";
 function App() {
   const [mensaje, setMensaje] = useState("Cargando conexión...");
   const [clientes, setClientes] = useState([]);
+  const [clienteNuevo, setClienteNuevo] = useState({
+  nombre: "",
+  email: "",
+  documento: "",
+  telefono: "",
+});
 
   const [factura, setFactura] = useState({
     cliente: "",
@@ -62,6 +68,49 @@ function App() {
       [e.target.name]: e.target.value,
     });
   };
+
+  const manejarCambioCliente = (e) => {
+  setClienteNuevo({
+    ...clienteNuevo,
+    [e.target.name]: e.target.value,
+  });
+};
+
+const crearCliente = async (e) => {
+  e.preventDefault();
+
+  try {
+    const respuesta = await fetch(`${API_URL}/api/clientes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(clienteNuevo),
+    });
+
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(datos.mensaje || "Error al crear el cliente");
+      return;
+    }
+
+    setClientes([...clientes, datos.cliente]);
+
+    setClienteNuevo({
+      nombre: "",
+      email: "",
+      documento: "",
+      telefono: "",
+    });
+
+    alert("Cliente creado correctamente");
+  } catch (error) {
+    console.error("Error al crear cliente:", error);
+    alert("No se pudo conectar con el backend");
+  }
+};
+
 
   const generarFactura = async (e) => {
     e.preventDefault();
@@ -190,6 +239,51 @@ function App() {
         <h2>Estado del backend</h2>
         <p>{mensaje}</p>
       </div>
+
+      <section className="card">
+  <h2>Crear cliente</h2>
+
+  <form onSubmit={crearCliente} className="formulario">
+    <label>Nombre</label>
+    <input
+      type="text"
+      name="nombre"
+      value={clienteNuevo.nombre}
+      onChange={manejarCambioCliente}
+      placeholder="Ej: Juan Pérez"
+      required
+    />
+
+    <label>Email</label>
+    <input
+      type="email"
+      name="email"
+      value={clienteNuevo.email}
+      onChange={manejarCambioCliente}
+      placeholder="Ej: cliente@mail.com"
+    />
+
+    <label>Documento</label>
+    <input
+      type="text"
+      name="documento"
+      value={clienteNuevo.documento}
+      onChange={manejarCambioCliente}
+      placeholder="Ej: 30111222"
+    />
+
+    <label>Teléfono</label>
+    <input
+      type="text"
+      name="telefono"
+      value={clienteNuevo.telefono}
+      onChange={manejarCambioCliente}
+      placeholder="Ej: 3804000000"
+    />
+
+    <button type="submit">Guardar cliente</button>
+    </form>
+    </section>
 
       <section className="card">
         <h2>Crear factura simulada</h2>
