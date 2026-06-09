@@ -168,13 +168,24 @@ const crearCliente = async (e) => {
   const generarFactura = async (e) => {
     e.preventDefault();
 
+    const clienteSeleccionado = clientes.find(
+  (cliente) => cliente.nombre.toLowerCase() === factura.cliente.toLowerCase()
+);
+
+const facturaParaEnviar = {
+  ...factura,
+  clienteEmail: clienteSeleccionado?.email || "",
+  clienteDocumento: clienteSeleccionado?.documento || "",
+  clienteTelefono: clienteSeleccionado?.telefono || "",
+};
+
     try {
       const respuesta = await fetch(`${API_URL}/api/facturas`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(factura),
+        body: JSON.stringify(facturaParaEnviar),
       });
 
       const datos = await respuesta.json();
@@ -206,8 +217,20 @@ const crearCliente = async (e) => {
 
     const pdf = new jsPDF();
 
-    pdf.setFontSize(20);
-    pdf.text(datosEmisor.nombre, 20, 20);
+    pdf.setFontSize(11);
+pdf.text(`Cliente: ${facturaParaDescargar.cliente}`, 20, 82);
+
+if (facturaParaDescargar.clienteDocumento) {
+  pdf.text(`Documento: ${facturaParaDescargar.clienteDocumento}`, 20, 90);
+}
+
+if (facturaParaDescargar.clienteEmail) {
+  pdf.text(`Email: ${facturaParaDescargar.clienteEmail}`, 20, 98);
+}
+
+if (facturaParaDescargar.clienteTelefono) {
+  pdf.text(`Teléfono: ${facturaParaDescargar.clienteTelefono}`, 20, 106);
+}
 
     pdf.setFontSize(11);
     pdf.text(`CUIT: ${datosEmisor.cuit}`, 20, 30);
@@ -230,21 +253,21 @@ const crearCliente = async (e) => {
     pdf.text(`Cliente: ${facturaParaDescargar.cliente}`, 20, 82);
 
     pdf.setFontSize(14);
-    pdf.text("Detalle del comprobante", 20, 105);
+    pdf.text("Detalle del comprobante", 20, 122);
 
     pdf.setFontSize(11);
-    pdf.text("Descripción", 20, 118);
-    pdf.text("Importe", 155, 118);
+    pdf.text("Descripción", 20, 135);
+    pdf.text("Importe", 155, 135);
 
-    pdf.line(20, 123, 190, 123);
+    pdf.line(20, 140, 190, 140);
 
-    pdf.text(facturaParaDescargar.descripcion, 20, 135);
-    pdf.text(`$${facturaParaDescargar.precio}`, 155, 135);
+    pdf.text(facturaParaDescargar.descripcion, 20, 152);
+    pdf.text(`$${facturaParaDescargar.precio}`, 155, 152);
 
-    pdf.line(20, 145, 190, 145);
+    pdf.line(20, 162, 190, 162);
 
     pdf.setFontSize(16);
-    pdf.text(`TOTAL: $${facturaParaDescargar.precio}`, 135, 160);
+    pdf.text(`TOTAL: $${facturaParaDescargar.precio}`, 135, 177);
 
     pdf.setFontSize(10);
     pdf.text("Este comprobante es simulado y no tiene validez fiscal.", 20, 275);
@@ -400,6 +423,24 @@ const crearCliente = async (e) => {
             <strong>Cliente:</strong> {facturaGenerada.cliente}
           </p>
 
+          {facturaGenerada.clienteDocumento && (
+  <p>
+    <strong>Documento:</strong> {facturaGenerada.clienteDocumento}
+  </p>
+)}
+
+{facturaGenerada.clienteEmail && (
+  <p>
+    <strong>Email:</strong> {facturaGenerada.clienteEmail}
+  </p>
+)}
+
+{facturaGenerada.clienteTelefono && (
+  <p>
+    <strong>Teléfono:</strong> {facturaGenerada.clienteTelefono}
+  </p>
+)}
+
           <p>
             <strong>Detalle:</strong> {facturaGenerada.descripcion}
           </p>
@@ -429,6 +470,9 @@ const crearCliente = async (e) => {
                 <strong>Factura N° {factura.numero}</strong>
                 <span>Fecha: {factura.fecha}</span>
                 <span>Cliente: {factura.cliente}</span>
+                {factura.clienteDocumento && (
+                <span>Documento: {factura.clienteDocumento}</span>
+                 )}
                 <span>Detalle: {factura.descripcion}</span>
                 <span>Total: ${factura.precio}</span>
 

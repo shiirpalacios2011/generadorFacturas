@@ -33,7 +33,14 @@ const obtenerFacturas = (req, res) => {
 };
 
 const crearFactura = (req, res) => {
-  const { cliente, descripcion, precio } = req.body;
+  const {
+  cliente,
+  clienteEmail,
+  clienteDocumento,
+  clienteTelefono,
+  descripcion,
+  precio,
+} = req.body;
 
   if (!cliente || !descripcion || precio === undefined || precio === "") {
     return res.status(400).json({
@@ -61,9 +68,12 @@ const crearFactura = (req, res) => {
     numero: numeroFactura,
     fecha: new Date().toLocaleDateString(),
     cliente,
+    clienteEmail: clienteEmail || "",
+    clienteDocumento: clienteDocumento || "",
+    clienteTelefono: clienteTelefono || "",
     descripcion,
     precio: precioNumero,
-  };
+    };
 
   facturas.push(nuevaFactura);
   guardarFacturas(facturas);
