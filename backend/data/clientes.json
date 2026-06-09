@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "nombre": "Cliente de prueba",
+    "email": "cliente@test.com",
+    "documento": "12345678",
+    "telefono": "3804000000"
+  },
+  {
+    "id": 2,
+    "nombre": "María Gómez",
+    "email": "maria@gmail.com",
+    "documento": "30111222",
+    "telefono": "3804555555"
+  },
+  {
+    "id": 3,
+    "nombre": "Juan Pérez",
+    "email": "juan@test.com",
+    "documento": "32111222",
+    "telefono": "3804999999"
+  },
+  {
+    "id": 4,
+    "nombre": "Made Palacios",
+    "email": "juan@test.com",
+    "documento": "32111222",
+    "telefono": "3804999999"
+  }
+]
