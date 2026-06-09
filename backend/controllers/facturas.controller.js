@@ -34,13 +34,13 @@ const obtenerFacturas = (req, res) => {
 
 const crearFactura = (req, res) => {
   const {
-  cliente,
-  clienteEmail,
-  clienteDocumento,
-  clienteTelefono,
-  descripcion,
-  precio,
-} = req.body;
+    cliente,
+    clienteEmail,
+    clienteDocumento,
+    clienteTelefono,
+    descripcion,
+    precio,
+  } = req.body || {};
 
   if (!cliente || !descripcion || precio === undefined || precio === "") {
     return res.status(400).json({
@@ -59,7 +59,9 @@ const crearFactura = (req, res) => {
   const facturas = leerFacturas();
 
   const nuevoId =
-    facturas.length > 0 ? Math.max(...facturas.map((factura) => factura.id)) + 1 : 1;
+    facturas.length > 0
+      ? Math.max(...facturas.map((factura) => factura.id)) + 1
+      : 1;
 
   const numeroFactura = `F-${String(nuevoId).padStart(5, "0")}`;
 
@@ -73,7 +75,8 @@ const crearFactura = (req, res) => {
     clienteTelefono: clienteTelefono || "",
     descripcion,
     precio: precioNumero,
-    };
+    estado: "Emitida",
+  };
 
   facturas.push(nuevaFactura);
   guardarFacturas(facturas);
@@ -84,7 +87,7 @@ const crearFactura = (req, res) => {
   });
 };
 
-const eliminarFactura = (req, res) => {
+const anularFactura = (req, res) => {
   const id = Number(req.params.id);
 
   const facturas = leerFacturas();
@@ -97,17 +100,33 @@ const eliminarFactura = (req, res) => {
     });
   }
 
-  const facturasActualizadas = facturas.filter((factura) => factura.id !== id);
+  if (facturaExiste.estado === "Anulada") {
+    return res.status(400).json({
+      mensaje: "La factura ya se encuentra anulada",
+    });
+  }
+
+  const facturasActualizadas = facturas.map((factura) => {
+    if (factura.id === id) {
+      return {
+        ...factura,
+        estado: "Anulada",
+        fechaAnulacion: new Date().toLocaleDateString(),
+      };
+    }
+
+    return factura;
+  });
 
   guardarFacturas(facturasActualizadas);
 
   res.json({
-    mensaje: "Factura eliminada correctamente",
+    mensaje: "Factura anulada correctamente",
   });
 };
 
 module.exports = {
   obtenerFacturas,
   crearFactura,
-  eliminarFactura,
+  anularFactura,
 };

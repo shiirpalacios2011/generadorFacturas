@@ -243,6 +243,11 @@ if (facturaParaDescargar.clienteTelefono) {
     pdf.setFontSize(11);
     pdf.text(`N°: ${facturaParaDescargar.numero}`, 120, 35);
     pdf.text(`Fecha: ${facturaParaDescargar.fecha}`, 120, 43);
+    pdf.text(`Estado: ${facturaParaDescargar.estado || "Emitida"}`, 120, 51);
+    if (facturaParaDescargar.estado === "Anulada") {
+  pdf.setFontSize(22);
+  pdf.text("ANULADA", 75, 95);
+}
 
     pdf.line(20, 55, 190, 55);
 
@@ -276,35 +281,38 @@ if (facturaParaDescargar.clienteTelefono) {
     pdf.save(`factura-${facturaParaDescargar.numero}.pdf`);
   };
 
-  const eliminarFactura = async (id) => {
-    const confirmar = confirm("¿Seguro querés eliminar esta factura?");
+   const anularFactura = async (id) => {
+  const confirmar = confirm("¿Seguro querés anular esta factura?");
 
-    if (!confirmar) {
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`${API_URL}/api/facturas/${id}/anular`, {
+      method: "PATCH",
+    });
+
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(datos.mensaje || "Error al anular la factura");
       return;
     }
 
-    try {
-      const respuesta = await fetch(`${API_URL}/api/facturas/${id}`, {
-        method: "DELETE",
+    obtenerFacturas();
+
+    if (facturaGenerada && facturaGenerada.id === id) {
+      setFacturaGenerada({
+        ...facturaGenerada,
+        estado: "Anulada",
       });
-
-      const datos = await respuesta.json();
-
-      if (!respuesta.ok) {
-        alert(datos.mensaje || "Error al eliminar la factura");
-        return;
-      }
-
-      obtenerFacturas();
-
-      if (facturaGenerada && facturaGenerada.id === id) {
-        setFacturaGenerada(null);
-      }
-    } catch (error) {
-      console.error("Error al eliminar factura:", error);
-      alert("No se pudo conectar con el backend");
     }
-  };
+  } catch (error) {
+    console.error("Error al anular factura:", error);
+    alert("No se pudo conectar con el backend");
+  }
+};
 
   return (
     <main className="contenedor">
@@ -449,6 +457,10 @@ if (facturaParaDescargar.clienteTelefono) {
             <strong>Total:</strong> ${facturaGenerada.precio}
           </p>
 
+          <p>
+          <strong>Estado:</strong> {facturaGenerada.estado || "Emitida"}
+          </p>
+
           <button
             className="boton-pdf"
             onClick={() => descargarPDF(facturaGenerada)}
@@ -474,7 +486,7 @@ if (facturaParaDescargar.clienteTelefono) {
                 <span>Documento: {factura.clienteDocumento}</span>
                  )}
                 <span>Detalle: {factura.descripcion}</span>
-                <span>Total: ${factura.precio}</span>
+                <span>Estado: {factura.estado || "Emitida"}</span>
 
                 <button
                   className="boton-pdf boton-pdf-historial"
@@ -483,12 +495,14 @@ if (facturaParaDescargar.clienteTelefono) {
                   Descargar PDF
                 </button>
 
+                {factura.estado !== "Anulada" && (
                 <button
-                  className="boton-eliminar"
-                  onClick={() => eliminarFactura(factura.id)}
+                className="boton-eliminar"
+                onClick={() => anularFactura(factura.id)}
                 >
-                  Eliminar
-                </button>
+                Anular
+               </button>
+                 )}
               </li>
             ))}
           </ul>
