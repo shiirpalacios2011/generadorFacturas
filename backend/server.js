@@ -46,19 +46,29 @@ let facturas = [];
 app.post("/api/facturas", (req, res) => {
   const { cliente, descripcion, precio } = req.body;
 
-  if (!cliente || !descripcion || !precio) {
+  if (!cliente || !descripcion || precio === undefined || precio === "") {
     return res.status(400).json({
       mensaje: "Faltan datos para generar la factura",
     });
   }
 
+  const precioNumero = Number(precio);
+
+  if (Number.isNaN(precioNumero) || precioNumero <= 0) {
+    return res.status(400).json({
+      mensaje: "El precio debe ser un número mayor a 0",
+    });
+  }
+
+  const numeroFactura = `F-${String(facturas.length + 1).padStart(5, "0")}`;
+
   const nuevaFactura = {
     id: facturas.length + 1,
-    numero: Math.floor(Math.random() * 100000),
+    numero: numeroFactura,
     fecha: new Date().toLocaleDateString(),
     cliente,
     descripcion,
-    precio: Number(precio),
+    precio: precioNumero,
   };
 
   facturas.push(nuevaFactura);
