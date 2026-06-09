@@ -112,6 +112,59 @@ const crearCliente = async (e) => {
 };
 
 
+  <section className="card historial">
+  <h2>Clientes cargados</h2>
+
+  {clientes.length === 0 ? (
+    <p>No hay clientes cargados todavía</p>
+  ) : (
+    <ul>
+      {clientes.map((cliente) => (
+        <li key={cliente.id}>
+          <strong>{cliente.nombre}</strong>
+
+          {cliente.email && <span>Email: {cliente.email}</span>}
+          {cliente.documento && <span>Documento: {cliente.documento}</span>}
+          {cliente.telefono && <span>Teléfono: {cliente.telefono}</span>}
+
+          <button
+            className="boton-eliminar"
+            onClick={() => eliminarCliente(cliente.id)}
+          >
+            Eliminar
+          </button>
+        </li>
+      ))}
+    </ul>
+  )}
+</section>
+  
+  const eliminarCliente = async (id) => {
+  const confirmar = confirm("¿Seguro querés eliminar este cliente?");
+
+  if (!confirmar) {
+    return;
+  }
+
+  try {
+    const respuesta = await fetch(`${API_URL}/api/clientes/${id}`, {
+      method: "DELETE",
+    });
+
+    const datos = await respuesta.json();
+
+    if (!respuesta.ok) {
+      alert(datos.mensaje || "Error al eliminar el cliente");
+      return;
+    }
+
+    setClientes(clientes.filter((cliente) => cliente.id !== id));
+  } catch (error) {
+    console.error("Error al eliminar cliente:", error);
+    alert("No se pudo conectar con el backend");
+  }
+};
+
   const generarFactura = async (e) => {
     e.preventDefault();
 
