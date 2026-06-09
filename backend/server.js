@@ -1,11 +1,39 @@
-const express= require ('express');
-const cors = require('cors');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+require("dotenv").config();;
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+const DATA_DIR = path.join(__dirname, "data");
+const FACTURAS_FILE = path.join(DATA_DIR, "facturas.json");
+
+const asegurarArchivoFacturas = () => {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR);
+  }
+
+  if (!fs.existsSync(FACTURAS_FILE)) {
+    fs.writeFileSync(FACTURAS_FILE, JSON.stringify([], null, 2));
+  }
+};
+
+const leerFacturas = () => {
+  asegurarArchivoFacturas();
+
+  const contenido = fs.readFileSync(FACTURAS_FILE, "utf-8");
+  return JSON.parse(contenido);
+};
+
+const guardarFacturas = (facturas) => {
+  asegurarArchivoFacturas();
+
+  fs.writeFileSync(FACTURAS_FILE, JSON.stringify(facturas, null, 2));
+};
 
 app.get('/', (req, res) => {
     res.send('Servidor del facturador funcionando');
@@ -41,7 +69,7 @@ app.get("/api/clientes", (req, res) => {
   res.json(clientes);
 });
 
-let facturas = [];
+let facturas = leerFacturas();
 
 app.post("/api/facturas", (req, res) => {
   const { cliente, descripcion, precio } = req.body;
@@ -72,6 +100,7 @@ app.post("/api/facturas", (req, res) => {
   };
 
   facturas.push(nuevaFactura);
+  guardarFacturas(facturas);
 
   res.status(201).json({
     mensaje: "Factura generada correctamente",
@@ -95,6 +124,7 @@ app.delete("/api/facturas/:id", (req, res) => {
   }
 
   facturas = facturas.filter((factura) => factura.id !== id);
+  guardarFacturas(facturas);
 
   res.json({
     mensaje: "Factura eliminada correctamente",
