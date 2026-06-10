@@ -31,6 +31,7 @@ function App() {
 
   const [facturaGenerada, setFacturaGenerada] = useState(null);
   const [historialFacturas, setHistorialFacturas] = useState([]);
+  const [busquedaFactura, setBusquedaFactura] = useState("");
 
   const facturasEmitidas = historialFacturas.filter(
     (factura) => factura.estado !== "Anulada"
@@ -44,6 +45,17 @@ function App() {
     (total, factura) => total + Number(factura.precio),
     0
   );
+
+  const facturasFiltradas = historialFacturas.filter((factura) => {
+    const textoBusqueda = busquedaFactura.toLowerCase();
+
+    return (
+      factura.numero.toLowerCase().includes(textoBusqueda) ||
+      factura.cliente.toLowerCase().includes(textoBusqueda) ||
+      factura.descripcion.toLowerCase().includes(textoBusqueda) ||
+      (factura.estado || "Emitida").toLowerCase().includes(textoBusqueda)
+    );
+  });
 
   const obtenerClientes = async () => {
     try {
@@ -411,11 +423,20 @@ function App() {
       <section className="card historial">
         <h2>Historial de facturas</h2>
 
+        <input
+          type="text"
+          value={busquedaFactura}
+          onChange={(e) => setBusquedaFactura(e.target.value)}
+          placeholder="Buscar por número, cliente, detalle o estado"
+        />
+
         {historialFacturas.length === 0 ? (
           <p>No hay facturas generadas todavía</p>
+        ) : facturasFiltradas.length === 0 ? (
+          <p>No se encontraron facturas con esa búsqueda</p>
         ) : (
           <ul>
-            {historialFacturas.map((factura) => (
+            {facturasFiltradas.map((factura) => (
               <li key={factura.id}>
                 <strong>Factura N° {factura.numero}</strong>
 
