@@ -33,13 +33,13 @@ const obtenerClientes = (req, res) => {
 };
 
 const crearCliente = (req, res) => {
-  const { nombre, email, documento, telefono } = req.body;
+  const { nombre, email, documento, telefono } = req.body || {};
 
-  if (!nombre) {
-    return res.status(400).json({
-      mensaje: "El nombre del cliente es obligatorio",
-    });
-  }
+  if (!nombre || !nombre.trim()) {
+  return res.status(400).json({
+    mensaje: "El nombre del cliente es obligatorio",
+  });
+}
 
   const clientes = leerClientes();
 
@@ -47,12 +47,12 @@ const crearCliente = (req, res) => {
     clientes.length > 0 ? Math.max(...clientes.map((cliente) => cliente.id)) + 1 : 1;
 
   const nuevoCliente = {
-    id: nuevoId,
-    nombre,
-    email: email || "",
-    documento: documento || "",
-    telefono: telefono || "",
-  };
+  id: nuevoId,
+  nombre: nombre.trim(),
+  email: email || "",
+  documento: documento || "",
+  telefono: telefono || "",
+};
 
   clientes.push(nuevoCliente);
   guardarClientes(clientes);
