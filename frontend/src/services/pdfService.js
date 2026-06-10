@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import { formatearMoneda } from "./formatService";
 
 const datosEmisor = {
   nombre: "Facturador APP",
@@ -66,12 +67,12 @@ export const descargarPDF = (facturaParaDescargar) => {
   pdf.line(20, 148, 190, 148);
 
   pdf.text(facturaParaDescargar.descripcion, 20, 160);
-  pdf.text(`$${facturaParaDescargar.precio}`, 155, 160);
+  pdf.text(formatearMoneda(facturaParaDescargar.precio), 155, 160);
 
   pdf.line(20, 170, 190, 170);
 
   pdf.setFontSize(16);
-  pdf.text(`TOTAL: $${facturaParaDescargar.precio}`, 135, 185);
+  pdf.text(`TOTAL: ${formatearMoneda(facturaParaDescargar.precio)}`, 120, 185);
 
   pdf.setFontSize(10);
   pdf.text("Este comprobante es simulado y no tiene validez fiscal.", 20, 275);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { descargarPDF } from "./services/pdfService";
+import { formatearMoneda } from "./services/formatService";
 import {
   obtenerMensajeBackend,
   obtenerClientes as obtenerClientesApi,
@@ -375,7 +376,7 @@ function App() {
           </p>
 
           <p>
-            <strong>Total:</strong> ${facturaGenerada.precio}
+            <strong>Total:</strong> {formatearMoneda(facturaGenerada.precio)}
           </p>
 
           <p>
@@ -403,7 +404,7 @@ function App() {
         </p>
 
         <p>
-          <strong>Total emitido:</strong> ${totalEmitido}
+          <strong>Total emitido:</strong> {formatearMoneda(totalEmitido)}
         </p>
       </section>
 
@@ -426,7 +427,7 @@ function App() {
                 )}
 
                 <span>Detalle: {factura.descripcion}</span>
-                <span>Total: ${factura.precio}</span>
+                <span>Total: {formatearMoneda(factura.precio)}</span>
                 <span>Estado: {factura.estado || "Emitida"}</span>
 
                 <button
