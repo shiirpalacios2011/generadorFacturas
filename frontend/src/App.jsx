@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import { jsPDF } from "jspdf";
+import { descargarPDF } from "./services/pdfService";
 import "./App.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 function App() {
   const [mensaje, setMensaje] = useState("Cargando conexión...");
   const [clientes, setClientes] = useState([]);
+
   const [clienteNuevo, setClienteNuevo] = useState({
-  nombre: "",
-  email: "",
-  documento: "",
-  telefono: "",
-});
+    nombre: "",
+    email: "",
+    documento: "",
+    telefono: "",
+  });
 
   const [factura, setFactura] = useState({
     cliente: "",
@@ -23,11 +24,14 @@ function App() {
   const [facturaGenerada, setFacturaGenerada] = useState(null);
   const [historialFacturas, setHistorialFacturas] = useState([]);
 
-  const datosEmisor = {
-    nombre: "Facturador APP",
-    cuit: "20-12345678-9",
-    domicilio: "Argentina",
-    condicionFiscal: "Monotributista",
+  const obtenerClientes = async () => {
+    try {
+      const respuesta = await fetch(`${API_URL}/api/clientes`);
+      const datos = await respuesta.json();
+      setClientes(datos);
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+    }
   };
 
   const obtenerFacturas = async () => {
@@ -50,15 +54,7 @@ function App() {
         setMensaje("No se pudo conectar con el backend");
       });
 
-    fetch(`${API_URL}/api/clientes`)
-      .then((respuesta) => respuesta.json())
-      .then((datos) => {
-        setClientes(datos);
-      })
-      .catch((error) => {
-        console.error("Error al obtener clientes:", error);
-      });
-
+    obtenerClientes();
     obtenerFacturas();
   }, []);
 
@@ -70,114 +66,86 @@ function App() {
   };
 
   const manejarCambioCliente = (e) => {
-  setClienteNuevo({
-    ...clienteNuevo,
-    [e.target.name]: e.target.value,
-  });
-};
-
-const crearCliente = async (e) => {
-  e.preventDefault();
-
-  try {
-    const respuesta = await fetch(`${API_URL}/api/clientes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(clienteNuevo),
-    });
-
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-      alert(datos.mensaje || "Error al crear el cliente");
-      return;
-    }
-
-    setClientes([...clientes, datos.cliente]);
-
     setClienteNuevo({
-      nombre: "",
-      email: "",
-      documento: "",
-      telefono: "",
+      ...clienteNuevo,
+      [e.target.name]: e.target.value,
     });
+  };
 
-    alert("Cliente creado correctamente");
-  } catch (error) {
-    console.error("Error al crear cliente:", error);
-    alert("No se pudo conectar con el backend");
-  }
-};
+  const crearCliente = async (e) => {
+    e.preventDefault();
 
+    try {
+      const respuesta = await fetch(`${API_URL}/api/clientes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(clienteNuevo),
+      });
 
-  <section className="card historial">
-  <h2>Clientes cargados</h2>
+      const datos = await respuesta.json();
 
-  {clientes.length === 0 ? (
-    <p>No hay clientes cargados todavía</p>
-  ) : (
-    <ul>
-      {clientes.map((cliente) => (
-        <li key={cliente.id}>
-          <strong>{cliente.nombre}</strong>
+      if (!respuesta.ok) {
+        alert(datos.mensaje || "Error al crear el cliente");
+        return;
+      }
 
-          {cliente.email && <span>Email: {cliente.email}</span>}
-          {cliente.documento && <span>Documento: {cliente.documento}</span>}
-          {cliente.telefono && <span>Teléfono: {cliente.telefono}</span>}
+      setClientes([...clientes, datos.cliente]);
 
-          <button
-            className="boton-eliminar"
-            onClick={() => eliminarCliente(cliente.id)}
-          >
-            Eliminar
-          </button>
-        </li>
-      ))}
-    </ul>
-  )}
-</section>
-  
+      setClienteNuevo({
+        nombre: "",
+        email: "",
+        documento: "",
+        telefono: "",
+      });
+
+      alert("Cliente creado correctamente");
+    } catch (error) {
+      console.error("Error al crear cliente:", error);
+      alert("No se pudo conectar con el backend");
+    }
+  };
+
   const eliminarCliente = async (id) => {
-  const confirmar = confirm("¿Seguro querés eliminar este cliente?");
+    const confirmar = confirm("¿Seguro querés eliminar este cliente?");
 
-  if (!confirmar) {
-    return;
-  }
-
-  try {
-    const respuesta = await fetch(`${API_URL}/api/clientes/${id}`, {
-      method: "DELETE",
-    });
-
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-      alert(datos.mensaje || "Error al eliminar el cliente");
+    if (!confirmar) {
       return;
     }
 
-    setClientes(clientes.filter((cliente) => cliente.id !== id));
-  } catch (error) {
-    console.error("Error al eliminar cliente:", error);
-    alert("No se pudo conectar con el backend");
-  }
-};
+    try {
+      const respuesta = await fetch(`${API_URL}/api/clientes/${id}`, {
+        method: "DELETE",
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        alert(datos.mensaje || "Error al eliminar el cliente");
+        return;
+      }
+
+      setClientes(clientes.filter((cliente) => cliente.id !== id));
+    } catch (error) {
+      console.error("Error al eliminar cliente:", error);
+      alert("No se pudo conectar con el backend");
+    }
+  };
 
   const generarFactura = async (e) => {
     e.preventDefault();
 
     const clienteSeleccionado = clientes.find(
-  (cliente) => cliente.nombre.toLowerCase() === factura.cliente.toLowerCase()
-);
+      (cliente) => cliente.nombre.toLowerCase() === factura.cliente.toLowerCase()
+    );
 
-const facturaParaEnviar = {
-  ...factura,
-  clienteEmail: clienteSeleccionado?.email || "",
-  clienteDocumento: clienteSeleccionado?.documento || "",
-  clienteTelefono: clienteSeleccionado?.telefono || "",
-};
+    const facturaParaEnviar = {
+      ...factura,
+      clienteEmail: clienteSeleccionado?.email || "",
+      clienteDocumento: clienteSeleccionado?.documento || "",
+      clienteTelefono: clienteSeleccionado?.telefono || "",
+    };
 
     try {
       const respuesta = await fetch(`${API_URL}/api/facturas`, {
@@ -209,110 +177,38 @@ const facturaParaEnviar = {
     }
   };
 
-  const descargarPDF = (facturaParaDescargar) => {
-    if (!facturaParaDescargar) {
-      alert("No hay factura para descargar");
+  const anularFactura = async (id) => {
+    const confirmar = confirm("¿Seguro querés anular esta factura?");
+
+    if (!confirmar) {
       return;
     }
 
-    const pdf = new jsPDF();
-
-    pdf.setFontSize(11);
-pdf.text(`Cliente: ${facturaParaDescargar.cliente}`, 20, 82);
-
-if (facturaParaDescargar.clienteDocumento) {
-  pdf.text(`Documento: ${facturaParaDescargar.clienteDocumento}`, 20, 90);
-}
-
-if (facturaParaDescargar.clienteEmail) {
-  pdf.text(`Email: ${facturaParaDescargar.clienteEmail}`, 20, 98);
-}
-
-if (facturaParaDescargar.clienteTelefono) {
-  pdf.text(`Teléfono: ${facturaParaDescargar.clienteTelefono}`, 20, 106);
-}
-
-    pdf.setFontSize(11);
-    pdf.text(`CUIT: ${datosEmisor.cuit}`, 20, 30);
-    pdf.text(`Domicilio: ${datosEmisor.domicilio}`, 20, 38);
-    pdf.text(`Condición fiscal: ${datosEmisor.condicionFiscal}`, 20, 46);
-
-    pdf.setFontSize(18);
-    pdf.text("FACTURA SIMULADA", 120, 25);
-
-    pdf.setFontSize(11);
-    pdf.text(`N°: ${facturaParaDescargar.numero}`, 120, 35);
-    pdf.text(`Fecha: ${facturaParaDescargar.fecha}`, 120, 43);
-    pdf.text(`Estado: ${facturaParaDescargar.estado || "Emitida"}`, 120, 51);
-    if (facturaParaDescargar.estado === "Anulada") {
-  pdf.setFontSize(22);
-  pdf.text("ANULADA", 75, 95);
-}
-
-    pdf.line(20, 55, 190, 55);
-
-    pdf.setFontSize(14);
-    pdf.text("Datos del cliente", 20, 70);
-
-    pdf.setFontSize(11);
-    pdf.text(`Cliente: ${facturaParaDescargar.cliente}`, 20, 82);
-
-    pdf.setFontSize(14);
-    pdf.text("Detalle del comprobante", 20, 122);
-
-    pdf.setFontSize(11);
-    pdf.text("Descripción", 20, 135);
-    pdf.text("Importe", 155, 135);
-
-    pdf.line(20, 140, 190, 140);
-
-    pdf.text(facturaParaDescargar.descripcion, 20, 152);
-    pdf.text(`$${facturaParaDescargar.precio}`, 155, 152);
-
-    pdf.line(20, 162, 190, 162);
-
-    pdf.setFontSize(16);
-    pdf.text(`TOTAL: $${facturaParaDescargar.precio}`, 135, 177);
-
-    pdf.setFontSize(10);
-    pdf.text("Este comprobante es simulado y no tiene validez fiscal.", 20, 275);
-    pdf.text("Generado por Facturador APP.", 20, 282);
-
-    pdf.save(`factura-${facturaParaDescargar.numero}.pdf`);
-  };
-
-   const anularFactura = async (id) => {
-  const confirmar = confirm("¿Seguro querés anular esta factura?");
-
-  if (!confirmar) {
-    return;
-  }
-
-  try {
-    const respuesta = await fetch(`${API_URL}/api/facturas/${id}/anular`, {
-      method: "PATCH",
-    });
-
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-      alert(datos.mensaje || "Error al anular la factura");
-      return;
-    }
-
-    obtenerFacturas();
-
-    if (facturaGenerada && facturaGenerada.id === id) {
-      setFacturaGenerada({
-        ...facturaGenerada,
-        estado: "Anulada",
+    try {
+      const respuesta = await fetch(`${API_URL}/api/facturas/${id}/anular`, {
+        method: "PATCH",
       });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        alert(datos.mensaje || "Error al anular la factura");
+        return;
+      }
+
+      obtenerFacturas();
+
+      if (facturaGenerada && facturaGenerada.id === id) {
+        setFacturaGenerada({
+          ...facturaGenerada,
+          estado: "Anulada",
+        });
+      }
+    } catch (error) {
+      console.error("Error al anular factura:", error);
+      alert("No se pudo conectar con el backend");
     }
-  } catch (error) {
-    console.error("Error al anular factura:", error);
-    alert("No se pudo conectar con el backend");
-  }
-};
+  };
 
   return (
     <main className="contenedor">
@@ -325,49 +221,76 @@ if (facturaParaDescargar.clienteTelefono) {
       </div>
 
       <section className="card">
-  <h2>Crear cliente</h2>
+        <h2>Crear cliente</h2>
 
-  <form onSubmit={crearCliente} className="formulario">
-    <label>Nombre</label>
-    <input
-      type="text"
-      name="nombre"
-      value={clienteNuevo.nombre}
-      onChange={manejarCambioCliente}
-      placeholder="Ej: Juan Pérez"
-      required
-    />
+        <form onSubmit={crearCliente} className="formulario">
+          <label>Nombre</label>
+          <input
+            type="text"
+            name="nombre"
+            value={clienteNuevo.nombre}
+            onChange={manejarCambioCliente}
+            placeholder="Ej: Juan Pérez"
+            required
+          />
 
-    <label>Email</label>
-    <input
-      type="email"
-      name="email"
-      value={clienteNuevo.email}
-      onChange={manejarCambioCliente}
-      placeholder="Ej: cliente@mail.com"
-    />
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={clienteNuevo.email}
+            onChange={manejarCambioCliente}
+            placeholder="Ej: cliente@mail.com"
+          />
 
-    <label>Documento</label>
-    <input
-      type="text"
-      name="documento"
-      value={clienteNuevo.documento}
-      onChange={manejarCambioCliente}
-      placeholder="Ej: 30111222"
-    />
+          <label>Documento</label>
+          <input
+            type="text"
+            name="documento"
+            value={clienteNuevo.documento}
+            onChange={manejarCambioCliente}
+            placeholder="Ej: 30111222"
+          />
 
-    <label>Teléfono</label>
-    <input
-      type="text"
-      name="telefono"
-      value={clienteNuevo.telefono}
-      onChange={manejarCambioCliente}
-      placeholder="Ej: 3804000000"
-    />
+          <label>Teléfono</label>
+          <input
+            type="text"
+            name="telefono"
+            value={clienteNuevo.telefono}
+            onChange={manejarCambioCliente}
+            placeholder="Ej: 3804000000"
+          />
 
-    <button type="submit">Guardar cliente</button>
-    </form>
-    </section>
+          <button type="submit">Guardar cliente</button>
+        </form>
+      </section>
+
+      <section className="card historial">
+        <h2>Clientes cargados</h2>
+
+        {clientes.length === 0 ? (
+          <p>No hay clientes cargados todavía</p>
+        ) : (
+          <ul>
+            {clientes.map((cliente) => (
+              <li key={cliente.id}>
+                <strong>{cliente.nombre}</strong>
+
+                {cliente.email && <span>Email: {cliente.email}</span>}
+                {cliente.documento && <span>Documento: {cliente.documento}</span>}
+                {cliente.telefono && <span>Teléfono: {cliente.telefono}</span>}
+
+                <button
+                  className="boton-eliminar"
+                  onClick={() => eliminarCliente(cliente.id)}
+                >
+                  Eliminar
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="card">
         <h2>Crear factura simulada</h2>
@@ -432,22 +355,22 @@ if (facturaParaDescargar.clienteTelefono) {
           </p>
 
           {facturaGenerada.clienteDocumento && (
-  <p>
-    <strong>Documento:</strong> {facturaGenerada.clienteDocumento}
-  </p>
-)}
+            <p>
+              <strong>Documento:</strong> {facturaGenerada.clienteDocumento}
+            </p>
+          )}
 
-{facturaGenerada.clienteEmail && (
-  <p>
-    <strong>Email:</strong> {facturaGenerada.clienteEmail}
-  </p>
-)}
+          {facturaGenerada.clienteEmail && (
+            <p>
+              <strong>Email:</strong> {facturaGenerada.clienteEmail}
+            </p>
+          )}
 
-{facturaGenerada.clienteTelefono && (
-  <p>
-    <strong>Teléfono:</strong> {facturaGenerada.clienteTelefono}
-  </p>
-)}
+          {facturaGenerada.clienteTelefono && (
+            <p>
+              <strong>Teléfono:</strong> {facturaGenerada.clienteTelefono}
+            </p>
+          )}
 
           <p>
             <strong>Detalle:</strong> {facturaGenerada.descripcion}
@@ -458,7 +381,7 @@ if (facturaParaDescargar.clienteTelefono) {
           </p>
 
           <p>
-          <strong>Estado:</strong> {facturaGenerada.estado || "Emitida"}
+            <strong>Estado:</strong> {facturaGenerada.estado || "Emitida"}
           </p>
 
           <button
@@ -480,12 +403,16 @@ if (facturaParaDescargar.clienteTelefono) {
             {historialFacturas.map((factura) => (
               <li key={factura.id}>
                 <strong>Factura N° {factura.numero}</strong>
+
                 <span>Fecha: {factura.fecha}</span>
                 <span>Cliente: {factura.cliente}</span>
+
                 {factura.clienteDocumento && (
-                <span>Documento: {factura.clienteDocumento}</span>
-                 )}
+                  <span>Documento: {factura.clienteDocumento}</span>
+                )}
+
                 <span>Detalle: {factura.descripcion}</span>
+                <span>Total: ${factura.precio}</span>
                 <span>Estado: {factura.estado || "Emitida"}</span>
 
                 <button
@@ -496,13 +423,13 @@ if (facturaParaDescargar.clienteTelefono) {
                 </button>
 
                 {factura.estado !== "Anulada" && (
-                <button
-                className="boton-eliminar"
-                onClick={() => anularFactura(factura.id)}
-                >
-                Anular
-               </button>
-                 )}
+                  <button
+                    className="boton-eliminar"
+                    onClick={() => anularFactura(factura.id)}
+                  >
+                    Anular
+                  </button>
+                )}
               </li>
             ))}
           </ul>
