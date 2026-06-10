@@ -47,15 +47,20 @@ function App() {
   );
 
   const facturasFiltradas = historialFacturas.filter((factura) => {
-    const textoBusqueda = busquedaFactura.toLowerCase();
+  const textoBusqueda = busquedaFactura.toLowerCase();
 
-    return (
-      factura.numero.toLowerCase().includes(textoBusqueda) ||
-      factura.cliente.toLowerCase().includes(textoBusqueda) ||
-      factura.descripcion.toLowerCase().includes(textoBusqueda) ||
-      (factura.estado || "Emitida").toLowerCase().includes(textoBusqueda)
-    );
-  });
+  const numero = factura.numero || "";
+  const cliente = factura.cliente || "";
+  const descripcion = factura.descripcion || "";
+  const estado = factura.estado || "Emitida";
+
+  return (
+    numero.toLowerCase().includes(textoBusqueda) ||
+    cliente.toLowerCase().includes(textoBusqueda) ||
+    descripcion.toLowerCase().includes(textoBusqueda) ||
+    estado.toLowerCase().includes(textoBusqueda)
+  );
+});
 
   const obtenerClientes = async () => {
     try {
