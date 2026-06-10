@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { descargarPDF } from "./services/pdfService";
+import {
+  obtenerMensajeBackend,
+  obtenerClientes as obtenerClientesApi,
+  crearCliente as crearClienteApi,
+  eliminarCliente as eliminarClienteApi,
+  obtenerFacturas as obtenerFacturasApi,
+  crearFactura as crearFacturaApi,
+  anularFactura as anularFacturaApi,
+} from "./services/apiService";
 import "./App.css";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 function App() {
   const [mensaje, setMensaje] = useState("Cargando conexión...");
@@ -26,8 +33,7 @@ function App() {
 
   const obtenerClientes = async () => {
     try {
-      const respuesta = await fetch(`${API_URL}/api/clientes`);
-      const datos = await respuesta.json();
+      const datos = await obtenerClientesApi();
       setClientes(datos);
     } catch (error) {
       console.error("Error al obtener clientes:", error);
@@ -36,8 +42,7 @@ function App() {
 
   const obtenerFacturas = async () => {
     try {
-      const respuesta = await fetch(`${API_URL}/api/facturas`);
-      const datos = await respuesta.json();
+      const datos = await obtenerFacturasApi();
       setHistorialFacturas(datos);
     } catch (error) {
       console.error("Error al obtener facturas:", error);
@@ -45,8 +50,7 @@ function App() {
   };
 
   useEffect(() => {
-    fetch(`${API_URL}/api/prueba`)
-      .then((respuesta) => respuesta.json())
+    obtenerMensajeBackend()
       .then((datos) => {
         setMensaje(datos.mensaje);
       })
@@ -58,7 +62,7 @@ function App() {
     obtenerFacturas();
   }, []);
 
-  const manejarCambio = (e) => {
+  const manejarCambioFactura = (e) => {
     setFactura({
       ...factura,
       [e.target.name]: e.target.value,
@@ -76,17 +80,9 @@ function App() {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch(`${API_URL}/api/clientes`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(clienteNuevo),
-      });
+      const { ok, datos } = await crearClienteApi(clienteNuevo);
 
-      const datos = await respuesta.json();
-
-      if (!respuesta.ok) {
+      if (!ok) {
         alert(datos.mensaje || "Error al crear el cliente");
         return;
       }
@@ -108,20 +104,16 @@ function App() {
   };
 
   const eliminarCliente = async (id) => {
-    const confirmar = confirm("¿Seguro querés eliminar este cliente?");
+    const confirmar = window.confirm("¿Seguro querés eliminar este cliente?");
 
     if (!confirmar) {
       return;
     }
 
     try {
-      const respuesta = await fetch(`${API_URL}/api/clientes/${id}`, {
-        method: "DELETE",
-      });
+      const { ok, datos } = await eliminarClienteApi(id);
 
-      const datos = await respuesta.json();
-
-      if (!respuesta.ok) {
+      if (!ok) {
         alert(datos.mensaje || "Error al eliminar el cliente");
         return;
       }
@@ -137,7 +129,8 @@ function App() {
     e.preventDefault();
 
     const clienteSeleccionado = clientes.find(
-      (cliente) => cliente.nombre.toLowerCase() === factura.cliente.toLowerCase()
+      (cliente) =>
+        cliente.nombre.toLowerCase() === factura.cliente.toLowerCase()
     );
 
     const facturaParaEnviar = {
@@ -148,17 +141,9 @@ function App() {
     };
 
     try {
-      const respuesta = await fetch(`${API_URL}/api/facturas`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(facturaParaEnviar),
-      });
+      const { ok, datos } = await crearFacturaApi(facturaParaEnviar);
 
-      const datos = await respuesta.json();
-
-      if (!respuesta.ok) {
+      if (!ok) {
         alert(datos.mensaje || "Error al generar la factura");
         return;
       }
@@ -178,20 +163,16 @@ function App() {
   };
 
   const anularFactura = async (id) => {
-    const confirmar = confirm("¿Seguro querés anular esta factura?");
+    const confirmar = window.confirm("¿Seguro querés anular esta factura?");
 
     if (!confirmar) {
       return;
     }
 
     try {
-      const respuesta = await fetch(`${API_URL}/api/facturas/${id}/anular`, {
-        method: "PATCH",
-      });
+      const { ok, datos } = await anularFacturaApi(id);
 
-      const datos = await respuesta.json();
-
-      if (!respuesta.ok) {
+      if (!ok) {
         alert(datos.mensaje || "Error al anular la factura");
         return;
       }
@@ -277,7 +258,9 @@ function App() {
                 <strong>{cliente.nombre}</strong>
 
                 {cliente.email && <span>Email: {cliente.email}</span>}
-                {cliente.documento && <span>Documento: {cliente.documento}</span>}
+                {cliente.documento && (
+                  <span>Documento: {cliente.documento}</span>
+                )}
                 {cliente.telefono && <span>Teléfono: {cliente.telefono}</span>}
 
                 <button
@@ -303,7 +286,7 @@ function App() {
             name="cliente"
             list="lista-clientes"
             value={factura.cliente}
-            onChange={manejarCambio}
+            onChange={manejarCambioFactura}
             placeholder="Seleccionar o escribir cliente"
             required
           />
@@ -319,7 +302,7 @@ function App() {
             type="text"
             name="descripcion"
             value={factura.descripcion}
-            onChange={manejarCambio}
+            onChange={manejarCambioFactura}
             placeholder="Ej: Servicio de diseño"
             required
           />
@@ -329,7 +312,7 @@ function App() {
             type="number"
             name="precio"
             value={factura.precio}
-            onChange={manejarCambio}
+            onChange={manejarCambioFactura}
             placeholder="Ej: 15000"
             required
           />
