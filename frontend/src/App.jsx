@@ -31,6 +31,19 @@ function App() {
   const [facturaGenerada, setFacturaGenerada] = useState(null);
   const [historialFacturas, setHistorialFacturas] = useState([]);
 
+  const facturasEmitidas = historialFacturas.filter(
+    (factura) => factura.estado !== "Anulada"
+  );
+
+  const facturasAnuladas = historialFacturas.filter(
+    (factura) => factura.estado === "Anulada"
+  );
+
+  const totalEmitido = facturasEmitidas.reduce(
+    (total, factura) => total + Number(factura.precio),
+    0
+  );
+
   const obtenerClientes = async () => {
     try {
       const datos = await obtenerClientesApi();
@@ -62,16 +75,16 @@ function App() {
     obtenerFacturas();
   }, []);
 
-  const manejarCambioFactura = (e) => {
-    setFactura({
-      ...factura,
+  const manejarCambioCliente = (e) => {
+    setClienteNuevo({
+      ...clienteNuevo,
       [e.target.name]: e.target.value,
     });
   };
 
-  const manejarCambioCliente = (e) => {
-    setClienteNuevo({
-      ...clienteNuevo,
+  const manejarCambioFactura = (e) => {
+    setFactura({
+      ...factura,
       [e.target.name]: e.target.value,
     });
   };
@@ -258,9 +271,11 @@ function App() {
                 <strong>{cliente.nombre}</strong>
 
                 {cliente.email && <span>Email: {cliente.email}</span>}
+
                 {cliente.documento && (
                   <span>Documento: {cliente.documento}</span>
                 )}
+
                 {cliente.telefono && <span>Teléfono: {cliente.telefono}</span>}
 
                 <button
@@ -375,6 +390,22 @@ function App() {
           </button>
         </section>
       )}
+
+      <section className="card">
+        <h2>Resumen de facturación</h2>
+
+        <p>
+          <strong>Facturas emitidas:</strong> {facturasEmitidas.length}
+        </p>
+
+        <p>
+          <strong>Facturas anuladas:</strong> {facturasAnuladas.length}
+        </p>
+
+        <p>
+          <strong>Total emitido:</strong> ${totalEmitido}
+        </p>
+      </section>
 
       <section className="card historial">
         <h2>Historial de facturas</h2>
