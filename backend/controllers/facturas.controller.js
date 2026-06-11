@@ -1,30 +1,13 @@
-const fs = require("fs");
-const path = require("path");
+const { leerJSON, guardarJSON } = require("../services/fileService");
 
-const DATA_DIR = path.join(__dirname, "..", "data");
-const FACTURAS_FILE = path.join(DATA_DIR, "facturas.json");
-
-const asegurarArchivoFacturas = () => {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR);
-  }
-
-  if (!fs.existsSync(FACTURAS_FILE)) {
-    fs.writeFileSync(FACTURAS_FILE, JSON.stringify([], null, 2));
-  }
-};
+const FACTURAS_FILE = "facturas.json";
 
 const leerFacturas = () => {
-  asegurarArchivoFacturas();
-
-  const contenido = fs.readFileSync(FACTURAS_FILE, "utf-8");
-  return JSON.parse(contenido);
+  return leerJSON(FACTURAS_FILE, []);
 };
 
 const guardarFacturas = (facturas) => {
-  asegurarArchivoFacturas();
-
-  fs.writeFileSync(FACTURAS_FILE, JSON.stringify(facturas, null, 2));
+  guardarJSON(FACTURAS_FILE, facturas);
 };
 
 const obtenerFacturas = (req, res) => {
@@ -69,11 +52,11 @@ const crearFactura = (req, res) => {
     id: nuevoId,
     numero: numeroFactura,
     fecha: new Date().toLocaleDateString(),
-    cliente,
+    cliente: cliente.trim(),
     clienteEmail: clienteEmail || "",
     clienteDocumento: clienteDocumento || "",
     clienteTelefono: clienteTelefono || "",
-    descripcion,
+    descripcion: descripcion.trim(),
     precio: precioNumero,
     estado: "Emitida",
   };
