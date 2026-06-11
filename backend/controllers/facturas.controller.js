@@ -1,17 +1,11 @@
-const { leerJSON, guardarJSON } = require("../services/fileService");
-
-const FACTURAS_FILE = "facturas.json";
-
-const leerFacturas = () => {
-  return leerJSON(FACTURAS_FILE, []);
-};
-
-const guardarFacturas = (facturas) => {
-  guardarJSON(FACTURAS_FILE, facturas);
-};
+const {
+  obtenerTodasLasFacturas,
+  crearFacturaRepository,
+  anularFacturaRepository,
+} = require("../repositories/facturas.repository");
 
 const obtenerFacturas = (req, res) => {
-  const facturas = leerFacturas();
+  const facturas = obtenerTodasLasFacturas();
   res.json(facturas);
 };
 
@@ -39,7 +33,7 @@ const crearFactura = (req, res) => {
     });
   }
 
-  const facturas = leerFacturas();
+  const facturas = obtenerTodasLasFacturas();
 
   const nuevoId =
     facturas.length > 0
@@ -61,8 +55,7 @@ const crearFactura = (req, res) => {
     estado: "Emitida",
   };
 
-  facturas.push(nuevaFactura);
-  guardarFacturas(facturas);
+  crearFacturaRepository(nuevaFactura);
 
   res.status(201).json({
     mensaje: "Factura generada correctamente",
@@ -73,38 +66,23 @@ const crearFactura = (req, res) => {
 const anularFactura = (req, res) => {
   const id = Number(req.params.id);
 
-  const facturas = leerFacturas();
+  const resultado = anularFacturaRepository(id);
 
-  const facturaExiste = facturas.find((factura) => factura.id === id);
-
-  if (!facturaExiste) {
+  if (!resultado) {
     return res.status(404).json({
       mensaje: "Factura no encontrada",
     });
   }
 
-  if (facturaExiste.estado === "Anulada") {
+  if (resultado.error === "FACTURA_YA_ANULADA") {
     return res.status(400).json({
       mensaje: "La factura ya se encuentra anulada",
     });
   }
 
-  const facturasActualizadas = facturas.map((factura) => {
-    if (factura.id === id) {
-      return {
-        ...factura,
-        estado: "Anulada",
-        fechaAnulacion: new Date().toLocaleDateString(),
-      };
-    }
-
-    return factura;
-  });
-
-  guardarFacturas(facturasActualizadas);
-
   res.json({
     mensaje: "Factura anulada correctamente",
+    factura: resultado,
   });
 };
 

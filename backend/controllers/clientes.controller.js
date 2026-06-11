@@ -1,17 +1,11 @@
-const { leerJSON, guardarJSON } = require("../services/fileService");
-
-const CLIENTES_FILE = "clientes.json";
-
-const leerClientes = () => {
-  return leerJSON(CLIENTES_FILE, []);
-};
-
-const guardarClientes = (clientes) => {
-  guardarJSON(CLIENTES_FILE, clientes);
-};
+const {
+  obtenerTodosLosClientes,
+  crearClienteRepository,
+  eliminarClienteRepository,
+} = require("../repositories/clientes.repository");
 
 const obtenerClientes = (req, res) => {
-  const clientes = leerClientes();
+  const clientes = obtenerTodosLosClientes();
   res.json(clientes);
 };
 
@@ -24,7 +18,7 @@ const crearCliente = (req, res) => {
     });
   }
 
-  const clientes = leerClientes();
+  const clientes = obtenerTodosLosClientes();
 
   const nuevoId =
     clientes.length > 0
@@ -39,8 +33,7 @@ const crearCliente = (req, res) => {
     telefono: telefono || "",
   };
 
-  clientes.push(nuevoCliente);
-  guardarClientes(clientes);
+  crearClienteRepository(nuevoCliente);
 
   res.status(201).json({
     mensaje: "Cliente creado correctamente",
@@ -51,19 +44,13 @@ const crearCliente = (req, res) => {
 const eliminarCliente = (req, res) => {
   const id = Number(req.params.id);
 
-  const clientes = leerClientes();
+  const clienteEliminado = eliminarClienteRepository(id);
 
-  const clienteExiste = clientes.find((cliente) => cliente.id === id);
-
-  if (!clienteExiste) {
+  if (!clienteEliminado) {
     return res.status(404).json({
       mensaje: "Cliente no encontrado",
     });
   }
-
-  const clientesActualizados = clientes.filter((cliente) => cliente.id !== id);
-
-  guardarClientes(clientesActualizados);
 
   res.json({
     mensaje: "Cliente eliminado correctamente",
