@@ -1,30 +1,13 @@
-const fs = require("fs");
-const path = require("path");
+const { leerJSON, guardarJSON } = require("../services/fileService");
 
-const DATA_DIR = path.join(__dirname, "..", "data");
-const CLIENTES_FILE = path.join(DATA_DIR, "clientes.json");
-
-const asegurarArchivoClientes = () => {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR);
-  }
-
-  if (!fs.existsSync(CLIENTES_FILE)) {
-    fs.writeFileSync(CLIENTES_FILE, JSON.stringify([], null, 2));
-  }
-};
+const CLIENTES_FILE = "clientes.json";
 
 const leerClientes = () => {
-  asegurarArchivoClientes();
-
-  const contenido = fs.readFileSync(CLIENTES_FILE, "utf-8");
-  return JSON.parse(contenido);
+  return leerJSON(CLIENTES_FILE, []);
 };
 
 const guardarClientes = (clientes) => {
-  asegurarArchivoClientes();
-
-  fs.writeFileSync(CLIENTES_FILE, JSON.stringify(clientes, null, 2));
+  guardarJSON(CLIENTES_FILE, clientes);
 };
 
 const obtenerClientes = (req, res) => {
@@ -36,23 +19,25 @@ const crearCliente = (req, res) => {
   const { nombre, email, documento, telefono } = req.body || {};
 
   if (!nombre || !nombre.trim()) {
-  return res.status(400).json({
-    mensaje: "El nombre del cliente es obligatorio",
-  });
-}
+    return res.status(400).json({
+      mensaje: "El nombre del cliente es obligatorio",
+    });
+  }
 
   const clientes = leerClientes();
 
   const nuevoId =
-    clientes.length > 0 ? Math.max(...clientes.map((cliente) => cliente.id)) + 1 : 1;
+    clientes.length > 0
+      ? Math.max(...clientes.map((cliente) => cliente.id)) + 1
+      : 1;
 
   const nuevoCliente = {
-  id: nuevoId,
-  nombre: nombre.trim(),
-  email: email || "",
-  documento: documento || "",
-  telefono: telefono || "",
-};
+    id: nuevoId,
+    nombre: nombre.trim(),
+    email: email || "",
+    documento: documento || "",
+    telefono: telefono || "",
+  };
 
   clientes.push(nuevoCliente);
   guardarClientes(clientes);
